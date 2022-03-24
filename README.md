@@ -8,7 +8,7 @@ A Sentinel Network dVPN TUI client.
 
 Install python dependencies
 ```shell
-pip install npyscreen requests configparser pkg_resources curses
+pip install npyscreen requests configparser pkg_resources curses prettytable
 ```
 
 Create a config folder

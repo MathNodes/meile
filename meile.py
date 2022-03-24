@@ -1,27 +1,25 @@
 #!/bin/env python3
 
-#import argparse
 import configparser
 import pkg_resources
 import shutil
 import npyscreen
 import requests
 import re
-
+from sys import exit
 from os import path
 from time import time
 from cli.sentinel import get_nodes, get_subscriptions,connect, disconnect
 from cli.sentinel import subscribe as SentinelSubscribe
 from datetime import datetime
 
-from curses import KEY_F2, KEY_F3, KEY_F5, KEY_F6, COLOR_CYAN
+from curses import KEY_F2, KEY_F3, KEY_F5, KEY_F6, KEY_F7, COLOR_CYAN
 
 
 BASEDIR = path.join(path.expanduser('~'), '.meile')
 CONFFILE = path.join(BASEDIR, 'config.ini')
 CONFIG = configparser.ConfigParser()
 MEILEVERSION = "MEILE v0.1.0"
-#KEYNAME="Bernoulli Numbers (dVPN)"
 ICANHAZURL = "https://icanhazip.com"
 KEY_C = 67
 KEY_D = 68
@@ -46,27 +44,9 @@ class BoxTitle(npyscreen.BoxTitle):
 
 class MeileApplication(npyscreen.NPSAppManaged):
     def onStart(self):
-        global CONFIG
-        #CONFIG = read_configuration(CONFFILE)
-        
-        #self.coin_pair = CONFIG['pair'].get('order_book','').split(',')
-        #self.hcoin_pair = CONFIG['pair'].get('trade_history', '').split(',')
-        #self.tcoin_pair = CONFIG['pair'].get('ticker', '').split(',')
+
         self.addForm('MAIN', MainApp, name=MEILEVERSION, color="STANDOUT")
-        '''
-        self.addForm("PAIR", EditPair, name="Trading Pair Books", color="IMPORTANT")
-        self.addForm("HISTORY", EditHistoryPair, name="Trading Pair History", color="IMPORTANT")
-        self.addForm("TICKER", EditTickerPair, name="Ticker Pair", color="IMPORTANT")
-        self.addForm("BUY",  BuyPair, name="Buy Pair", color="IMPORTANT")
-        self.addForm("SELL", SellPair, name="Sell Pair", color="IMPORTANT")
-        self.addForm("CANCEL", CancelOrder, name="Cancel Order", color="IMPORTANT")
-        self.addForm("DEPOSIT", GetCoinDepositAddress, name="Add Deposit Address", color="IMPORTANT")
-        self.addForm("WITHDRAW", WithdrawCoin, name="Withdraw", color="IMPORTANT")
-        self.addForm("DHISTORY", GetDepositHistory, name="Deposit History", color="IMPORTANT")
-        self.addForm("WHISTORY", GetWithdrawHistory, name="Withdraw History", color="IMPORTANT")
-        self.addForm("THISTORY", GetTradeHistory, name="Trades History", color="IMPORTANT")
-        '''
-        #self.change_form("MAIN")
+
     def onCleanExit(self):
         npyscreen.notify_wait("Goodbye!")
 
@@ -108,10 +88,7 @@ class MainApp(npyscreen.FormWithMenus):
                                     editable = None, 
                                     relx = int((self.x - len(self.getTimeDate().split('\n')[-1])-7) / 2))
         
-        #self.getBalances()
-            
-        #self.add_handlers({"^O": self.cancel_order})
-        
+
         req = requests.get(ICANHAZURL)
         self.ip = req.text
         self.old_ip = self.ip
@@ -124,7 +101,9 @@ class MainApp(npyscreen.FormWithMenus):
         columns = shutil.get_terminal_size().columns
         rows = int(int(shutil.get_terminal_size().lines) / 2)
         newline = "\n"
-        print(rows*newline,"Loading....".center(columns), end=' ')
+        if not rows*2 >= 66 or not columns >= 210:
+            exit("Terminal not big enough. Please make sure your terminal is at least 66x210. Use 'stty size' to determine and adjust appropriately.")
+        print(rows*newline,"Loading.... (%s x %s)".center(columns) % (rows*2, columns), end=' ')
         linlen=len(data[2])
         self.logo = self.add(npyscreen.BoxTitle, values=data, rely=4, relx= int((self.x - linlen) / 2),
                max_width=linlen+7,max_height=len(data)+2)
@@ -136,8 +115,9 @@ class MainApp(npyscreen.FormWithMenus):
         
         
         self.add(npyscreen.FixedText,rely=4, relx= self.x - 40, value="Press, H, for help", editable = None)
-        self.add(npyscreen.FixedText,rely=9, relx= self.x - 48, value="Wallet: %s" % WALLET, editable = None)
-        self.add(npyscreen.FixedText,rely=10, relx= self.x - 48, value="Address: %s" % ADDRESS, editable = None)
+        self.add(npyscreen.FixedText,rely=5, relx= self.x - 40, value="CTRL+x, for menu", editable = None)
+        self.add(npyscreen.FixedText,rely=9, relx= self.x - 58, value="Wallet: %s" % WALLET, editable = None)
+        self.add(npyscreen.FixedText,rely=10, relx= self.x - 58, value="Address: %s" % ADDRESS, editable = None)
         
                  
         self.m1 = self.add_menu(name="Main Menu", shortcut="^M")
@@ -155,15 +135,7 @@ class MainApp(npyscreen.FormWithMenus):
                                         'widgets_inherit_color': False,}
                                     )
 
-        '''
-        self.dVPNs = self.add(npyscreen.BoxTitle, name="Sentinel Nodes", values=NodeData,
-                                    max_height=self.y - 30, width = self.x - 6, rely = 11,
-                                    scroll_exit = True, editable = True,
-                                    contained_widget_arguments={
-                                        'color': "CAUTION", 
-                                        'widgets_inherit_color': False,}
-                                    )
-        '''
+
         self.subs = self.add(BoxTitle, name="Active Subscriptions", values=self.SubsData,
                                     max_height=10, width = self.x - 10, rely = self.y - 18,
                                     scroll_exit = True, editable = True,
@@ -177,12 +149,12 @@ class MainApp(npyscreen.FormWithMenus):
         self.address = self.add(npyscreen.TitleText, name = "Address: ", value=None, use_two_lines = False, begin_entry_at = 10, rely = self.y - 4, editable = None)
         self.deposit = self.add(npyscreen.TitleText, name = "Deposit: ", value=None, use_two_lines = False, begin_entry_at = 10, rely = self.y - 6, relx = 72, editable = None )
         self.price = self.add(npyscreen.TitleText, name = "Price: ", value=None, use_two_lines = False, begin_entry_at = 10, rely = self.y - 5, relx = 72, editable = None )
-        self.dataGB = self.add(npyscreen.TitleSlider, max_width = 80, label=True, name="GB", value=19, out_of = 1000, step = 2, block_color = COLOR_CYAN, rely = self.y - 4, relx = 72)
-        self.add(npyscreen.FixedText, rely = self.y - 3, value="Use the menu to Connect/Subscribe (CTRL+X)", editable = None)
+        self.dataGB = self.add(npyscreen.TitleSlider, max_width = 80, label=True, name="GB", value=19, out_of = 1000, step = 2, block_color = COLOR_CYAN, rely = self.y - 3, relx = 72)
+        #self.add(npyscreen.FixedText, rely = self.y - 3, value="Use the menu to Connect/Subscribe (CTRL+X)", editable = None)
         self.add_handlers({KEY_F2: self.display_boxy})
         self.add_handlers({KEY_F3: self.display_boxy2})
         self.add_handlers({KEY_F5: self.reloadsubs})
-        self.add_handlers({KEY_F6: self.reloadnodes})
+        self.add_handlers({KEY_F7: self.reloadnodes})
         self.add_handlers({KEY_H: self.helpme})
         self.add_handlers({KEY_C: self.connect_subscription})
         self.add_handlers({KEY_D: self.part_subscription})
@@ -205,7 +177,7 @@ class MainApp(npyscreen.FormWithMenus):
                 F2           - Load Subscription Data to Connect to Node
                 F3           - Load Node Info to Subscribe to Node
                 F5           - Refresh Subscription data (Useful after subscribing)
-                F6           - Refresh Node Data
+                F7           - Refresh Node Data
                 PGDN         - Scroll the data downwards
                 PGUP         - Scroll the data upwards
                 Enter/Space  - Select a node
@@ -223,12 +195,14 @@ class MainApp(npyscreen.FormWithMenus):
     def reloadsubs(self, *args, **keywords):
         global CONFIG
         ADDRESS = CONFIG['wallet'].get('address','')
+        npyscreen.notify("Relading Subscriptions... Please wait...", title="Meile Subscriptions")
         self.SubsData = get_subscriptions(self.result,ADDRESS)
         self.subs.values = self.SubsData
         self.subs.display()
          
     def reloadnodes(self, *args, **keywords):
-        self.NodeData = get_nodes()
+        npyscreen.notify("Reloading Nodes... Please wait...", title="Sentinel dVPN nodes")
+        self.NodeData,self.result = get_nodes()
         self.dVPNs.values = self.NodeData
         self.dVPNs.display()
     
@@ -253,23 +227,34 @@ class MainApp(npyscreen.FormWithMenus):
     def connect_subscription(self, *args, **keywords):
         global CONFIG
         KEYNAME = CONFIG['wallet'].get('keyname', '')
-        try: 
-            if self.id.value is not None and self.address.value is not None:
-                returncode = connect(self.id.value, self.address.value, KEYNAME)
-            if returncode == 0:
-                npyscreen.notify_confirm("Connection Successful!", title="Sentinel dVPN")
-                self.CONNECTED = True
-                self.get_ip_address()
-            else:
+        message='''
+Connection Info:
+Node: %s
+Node Address: %s
+Keyname: %s
+''' % (self.node.value, self.address.value, KEYNAME)
+        ret = npyscreen.notify_ok_cancel(message, title="Meile Connection (Sentinel Network)")
+        if ret:
+            npyscreen.notify_wait("Connecting... Please wait...", title="Sentinel Network")
+            try: 
+                if self.id.value is not None and self.address.value is not None:
+                    returncode = connect(self.id.value, self.address.value, KEYNAME)
+                if returncode == 0:
+                    npyscreen.notify_confirm("Connection Successful!", title="Sentinel dVPN")
+                    self.CONNECTED = True
+                    self.get_ip_address()
+                else:
+                    npyscreen.notify_confirm("ERROR: Something went wrong", title="Sentinel dVPN")
+                
+            except:
                 npyscreen.notify_confirm("ERROR: Something went wrong", title="Sentinel dVPN")
-            
-        except:
-            npyscreen.notify_confirm("ERROR: Something went wrong", title="Sentinel dVPN")
-            
+        else:
+            npyscreen.notify_wait("Ok. We won't connect to the selected node.", title="Sentinel Network")
             
                 
                 
     def part_subscription(self, *args, **keywords):
+        npyscreen.notify_wait("Disconnecting.... Please wait...", title="Sentinel Network")
         try:
             returncode = disconnect()
             if returncode == 0:
@@ -287,12 +272,12 @@ class MainApp(npyscreen.FormWithMenus):
         
         try:
             message='''
-                    Subscription Info:
-                    Node: %s
-                    Node Address: %s
-                    Deposit: %s
-                    Keyname: %s
-                    ''' % (self.node.value, self.address.value, self.deposit.value, KEYNAME)
+Subscription Info:
+Node: %s
+Node Address: %s
+Deposit: %s
+Keyname: %s
+''' % (self.node.value, self.address.value, self.deposit.value, KEYNAME)
             ret = npyscreen.notify_ok_cancel(message, title="Meile Subscription (Sentinel Network)")
             if ret:
                 if self.address.value and self.deposit.value != "N/A" and self.deposit.value:

@@ -136,6 +136,7 @@ def get_subscriptions(result, ADDRESS):
     
     k=0
     j=0
+    # This would be the more efficent algorithm. Not a fan of O(n^2)
     #for e1,e2 in zip(Nodespos,Subspos):
     for sub in SubsResult[SubsInfoKeys[5]]:
         for node in NodeAddys:
@@ -179,8 +180,6 @@ def disconnect():
     ifCMD = ["ifconfig", "-a"]
     ifgrepCMD = ["grep", "-oE", "wg[0-9]+"]
     partCMD = ["sentinelcli", "disconnect"]
-    #delifCMD = ['sudo', 'ip', 'link', "delete", "wg99"]
-    
     
     ifoutput = Popen(ifCMD,stdin=PIPE, stdout=PIPE, stderr=STDOUT)
     grepoutput = Popen(ifgrepCMD, stdin=ifoutput.stdout, stdout=PIPE, stderr=STDOUT)
@@ -193,29 +192,26 @@ def disconnect():
     proc1 = Popen(partCMD)
     proc1.wait(timeout=10)
     
-    #proc = Popen(delifCMD)
     proc = Popen(wg_downCMD, stdout=PIPE, stderr=PIPE)
-    proc_out, proc_err = proc.communicate()
-    OUTPUT = proc_out + proc_err
+    proc_out,proc_err = proc.communicate()
     return proc.returncode
 
 def connect(ID, address, keyname):
     connCMD = ["sentinelcli", "connect", "--keyring-backend", "os", "--chain-id", "sentinelhub-2",
                "--node", "https://rpc.mathnodes.com:4444", "--gas-prices", "0.1udvpn", "--yes", "--from",keyname, ID, address]
     proc = Popen(connCMD, stdout=PIPE, stderr=PIPE)
-    proc_out, proc_err = proc.communicate()
-    OUTPUT = proc_out + proc_err
+    proc_out,proc_err = proc.communicate()
     return proc.returncode
 
 def subscribe(KEYNAME, NODE, DEPOSIT):
-    #print("%s\n%s\n%s" % (KEYNAME,NODE,DEPOSIT))
+
     subscribeCMD = ["sentinelcli", "tx", "subscription", "subscribe-to-node", "--home", BASEDIR,  "--yes",
                     "--keyring-backend", "os", "--gas-prices", "0.1udvpn", "--chain-id", "sentinelhub-2",
                     "--node", "https://rpc.mathnodes.com:4444", "--from", "%s" % KEYNAME, NODE, DEPOSIT]
     
     subproc = Popen(subscribeCMD, stdout=PIPE, stderr=PIPE)
-    sub_out, sub_proc = subproc.communicate()
-    #print (sub_out+sub_proc)
+    proc_out,proc_err = subproc.communicate()
+    #print(proc_out+proc_err)
     return subproc.returncode
     
     
