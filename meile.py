@@ -19,7 +19,7 @@ from curses import KEY_F2, KEY_F3, KEY_F5, KEY_F6, KEY_F7, COLOR_CYAN
 BASEDIR = path.join(path.expanduser('~'), '.meile')
 CONFFILE = path.join(BASEDIR, 'config.ini')
 CONFIG = configparser.ConfigParser()
-MEILEVERSION = "MEILE v0.1.0"
+MEILEVERSION = "MEILE v0.2.1"
 ICANHAZURL = "https://icanhazip.com"
 KEY_C = 67
 KEY_D = 68
@@ -171,7 +171,7 @@ class MainApp(npyscreen.FormWithMenus):
     def helpme(self, *args, **keywords):
         
         message='''
-                HELP SCREEN (Meile v0.1.0) (MathNodes)
+                HELP SCREEN (%s) (MathNodes)
                 
                 Commands:
                 F2           - Load Subscription Data to Connect to Node
@@ -188,8 +188,8 @@ class MainApp(npyscreen.FormWithMenus):
                 S            - Subscribe to loaded node data (from F3)
                 D            - Disconnect from connectd node
                 C            - Connect to loaded subscription (From F2)
-                '''
-        npyscreen.notify_confirm(message, title="Meile HELP v0.1.0 (MathNodes)", form_color = "STANDOUT" , wide=True)
+                ''' % MEILEVERSION
+        npyscreen.notify_confirm(message, title="Meile HELP v0.2.0 (MathNodes)", form_color = "STANDOUT" , wide=True)
                 
         
     def reloadsubs(self, *args, **keywords):
