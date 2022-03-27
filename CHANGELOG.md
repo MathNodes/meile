@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version 0.2.1-BETA (27/03/2022)
+* ADD: Added logo.uni
+* FIX: config.ini
+* REPO UPDATED
+
 ## Version 0.2.0-BETA (24/03/2022)
 * FIX: F7 to reload node data as F6 is npyscreen command
 * FIX: Return values of get_nodes() upon refresh
