@@ -2,8 +2,11 @@ from subprocess import Popen, PIPE, STDOUT
 import collections
 from prettytable import PrettyTable
 from os import path
+import re
+
 
 IBCSCRT = 'ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8'
+IBCUNKWN = 'ibc/9BCB27203424535B6230D594553F1659C77EC173E36D9CF4759E7186EE747E84'
 BASEDIR = path.join(path.expanduser('~'), '.sentinelcli')
 
 NodesInfoKeys = ["Moniker","Address","Provider","Price","Country","Speed","Latency","Peers","Handshake","Version","Status"]
@@ -37,17 +40,24 @@ def get_nodes():
                           
         else: 
             ninfos = str(line.decode('utf-8')).split('|')[1:-1]
-            AllNodesInfo.append(dict(zip(NodesInfoKeys, ninfos)))
+            if ninfos[0].isspace():
+                continue
+            elif ninfos[1].isspace():
+                continue
+            else:
+                AllNodesInfo.append(dict(zip(NodesInfoKeys, ninfos)))
             #print(ninfos, end='\n')
     
     #get = input("Blah: ")
-    AllNodesInfoSorted = sorted(AllNodesInfo, key=lambda d: d[NodesInfoKeys[4]], reverse=True)
+    AllNodesInfoSorted = sorted(AllNodesInfo, key=lambda d: d[NodesInfoKeys[4]])
     result = collections.defaultdict(list)
     
     for d in AllNodesInfoSorted:
         for k, v in d.items():
             if IBCSCRT in v:
                 v = v.replace(IBCSCRT,'uscrt')
+            elif IBCUNKWN in v:
+                v = v.replace(IBCUNKWN,'unkwn')
             result[k].append(v.lstrip().rstrip())
             
     
@@ -108,6 +118,8 @@ def get_subscriptions(result, ADDRESS):
         for k, v in d.items():
             if IBCSCRT in v:
                 v = v.replace(IBCSCRT,'uscrt')
+            elif IBCUNKWN in v:
+                v = v.replace(IBCUNKWN, 'unkwn')
             SubsResult[k].append(v.lstrip().rstrip())
             
     SubsAddressSet = set(SubsResult[SubsInfoKeys[5]])
@@ -155,14 +167,20 @@ def get_subscriptions(result, ADDRESS):
                         break
                     else:
                         nodeQuota = str(line.decode('utf-8')).split("|")[2:-1]
-                SubsTable.add_row([SubsResult[SubsInfoKeys[0]][k],
-                                    result[NodesInfoKeys[0]][Nodespos[j]],
-                                    SubsResult[SubsInfoKeys[5]][k],
-                                    SubsResult[SubsInfoKeys[6]][k],
-                                    SubsResult[SubsInfoKeys[7]][k],
-                                    result[NodesInfoKeys[4]][Nodespos[j]],
-                                    nodeQuota[0],
-                                    nodeQuota[1]])
+                        allotted = float(re.findall(r'[0-9]+\.[0-9]+', nodeQuota[0])[0])
+                        consumed = float(re.findall(r'[0-9]+\.[0-9]+', nodeQuota[1])[0])
+                        
+                        if allotted == consumed:
+                            break
+                        else:
+                            SubsTable.add_row([SubsResult[SubsInfoKeys[0]][k],
+                                                result[NodesInfoKeys[0]][Nodespos[j]],
+                                                SubsResult[SubsInfoKeys[5]][k],
+                                                SubsResult[SubsInfoKeys[6]][k],
+                                                SubsResult[SubsInfoKeys[7]][k],
+                                                result[NodesInfoKeys[4]][Nodespos[j]],
+                                                nodeQuota[0],
+                                                nodeQuota[1]])
 
                 break
             else:

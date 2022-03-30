@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## Version 0.3.0-BETA (30/03/2022)
+* FIX: Remove Multiple Subscriptions when fully consumed
+* FIX: IBC Token listing bug
+* ENHANCEMENT: Remove null nodes
+* ENHANCEMENT: A-Z Sort of Nodes
+* ADD: Support for new IBC token
+
 ## Version 0.2.1-BETA (27/03/2022)
 * ADD: Added logo.uni
 * FIX: config.ini
