@@ -37,7 +37,8 @@ def get_nodes():
             for ninf in str(line.decode('utf-8')).split('|')[3:-1]:
                 ninfos.append(ninf)
             AllNodesInfo.append(dict(zip(NodesInfoKeys, ninfos)))
-                          
+        elif "Testserver" in str(line.decode('utf-8')):
+            continue
         else: 
             ninfos = str(line.decode('utf-8')).split('|')[1:-1]
             if ninfos[0].isspace():
