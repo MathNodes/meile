@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Version 0.3.1-BETA (08/04/2022)
+* FIX: BadgerBite Testserver listen errors
+
+
 ## Version 0.3.0-BETA (30/03/2022)
 * FIX: Remove Multiple Subscriptions when fully consumed
 * FIX: IBC Token listing bug
