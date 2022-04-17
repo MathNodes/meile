@@ -4,35 +4,55 @@ A Sentinel Network dVPN TUI client.
 ## Dependencies
 ![sentinel-cli](https://github.com/sentinel-official/cli-client)
 
-## Installation (Linux)
+You will need this in order for Meile to operate. Future versions of meile will ship with sentinel-cli. For now, please download and configure your wallet with the sentinel-cli app. 
+
+## Install (pip)
+
+Open up a terminal and run:
+
+```shell
+pip install meile
+```
+
+To start Meile simply run:
+
+```shell
+meile
+```
+
+## Intall (source)
+
+```shell
+git clone https://github.com/MathNodes/meile
+```
+
+Build
+```shell
+cd meile && python3 -m build
+```
+
+Install
+```shell
+python3 setup.py install
+```
 
 Install python dependencies
 ```shell
-pip install npyscreen requests configparser curses prettytable
+pip install npyscreen requests prettytable
 ```
 
-Create a config folder
+Run:
 ```shell
-mkdir -p $HOME/.meile
+meile
 ```
 
-Clone repo & copy config.ini
-```shell
-mkdir -p $HOME/git && cd $HOME/git && \ 
-git clone https://github.com/MathNodes/meile && \
-cp $HOME/git/meile/config.ini $HOME/.meile
-```
+It will prompt you or your Wallet Name and Wallet Address. Meile will store this information in the `$HOME/.meile/config.ini` for future processing.
 
-Run
-```shell
-cd $HOME/git/meile && python3 meile.py
-```
-
-It will prompt you or your Wallet Name and Wallet Address. 
-Meile will store this information in the `$HOME/.meile/config.ini` for future processing.
+## Screenshot
+![img/scrshot.png](img/scrshot.png)
 
 ## Notes
-More to come. This is a beta release. It will be packaged as a pip package for official release. Please address all issues in the **issues** section of this repo. We will work
+Please address all issues in the **issues** section of this repo. We will work
 to fix any issues or add enhancments people may suggest. 
 
 ## Tipjar

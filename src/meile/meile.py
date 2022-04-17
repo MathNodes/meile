@@ -8,6 +8,7 @@ import requests
 import re
 from sys import exit
 from os import path
+import os
 from time import time
 from cli.sentinel import get_nodes, get_subscriptions,connect, disconnect
 from cli.sentinel import subscribe as SentinelSubscribe
@@ -19,7 +20,8 @@ from curses import KEY_F2, KEY_F3, KEY_F5, KEY_F6, KEY_F7, COLOR_CYAN
 BASEDIR = path.join(path.expanduser('~'), '.meile')
 CONFFILE = path.join(BASEDIR, 'config.ini')
 CONFIG = configparser.ConfigParser()
-MEILEVERSION = "MEILE v0.3.1"
+LOGOFILE = os.path.join(BASEDIR, 'logo.uni')
+MEILEVERSION = "MEILE v0.4.3"
 ICANHAZURL = "https://icanhazip.com"
 KEY_C = 67
 KEY_D = 68
@@ -29,13 +31,23 @@ KEY_S = 83
 def read_configuration(confpath):
     """Read the configuration file at given path."""
     # copy our default config file
-    if not path.isfile(confpath):
-        defaultconf = pkg_resources.resource_filename(__name__, 'config.ini')
-        shutil.copyfile(defaultconf, CONFFILE)
+    
+    if os.path.isdir(BASEDIR):
+        if not os.path.isfile(confpath):
+            defaultconf = pkg_resources.resource_filename(__name__, 'config.ini')
+            defaultlogo = pkg_resources.resource_filename(__name__, 'logo.uni')
+            shutil.copyfile(defaultconf, CONFFILE)
+            shutil.copyfile(defaultlogo, LOGOFILE)
 
+    else:
+        os.mkdir(BASEDIR)
+        defaultconf = pkg_resources.resource_filename(__name__, 'config.ini')
+        defaultlogo = pkg_resources.resource_filename(__name__, 'logo.uni')
+        shutil.copyfile(defaultconf, CONFFILE)
+        shutil.copyfile(defaultlogo, LOGOFILE)
+        
     CONFIG.read(confpath)
     return CONFIG
-
 
     
 class BoxTitle(npyscreen.BoxTitle):
@@ -95,7 +107,7 @@ class MainApp(npyscreen.FormWithMenus):
         
         IPDATA = ["NEW IP: " + self.ip, "OLD IP: " + self.old_ip]  
 
-        with open('logo.uni', 'r') as logo:
+        with open(LOGOFILE, 'r') as logo:
             data = logo.readlines()
             
         columns = shutil.get_terminal_size().columns
@@ -207,8 +219,7 @@ class MainApp(npyscreen.FormWithMenus):
         self.dVPNs.display()
     
     def get_ip_address(self):
-        if not self.CONNECTED:
-            self.old_ip = self.ip
+        self.old_ip = self.ip
         req = requests.get(ICANHAZURL)
         self.ip = req.text
     
@@ -238,10 +249,9 @@ Keyname: %s
             npyscreen.notify_wait("Connecting... Please wait...", title="Sentinel Network")
             try: 
                 if self.id.value is not None and self.address.value is not None:
-                    returncode = connect(self.id.value, self.address.value, KEYNAME)
-                if returncode == 0:
+                    returncode, self.CONNECTED = connect(self.id.value, self.address.value, KEYNAME)
+                if returncode == 0 and self.CONNECTED:
                     npyscreen.notify_confirm("Connection Successful!", title="Sentinel dVPN")
-                    self.CONNECTED = True
                     self.get_ip_address()
                 else:
                     npyscreen.notify_confirm("ERROR: Something went wrong", title="Sentinel dVPN")
@@ -256,10 +266,9 @@ Keyname: %s
     def part_subscription(self, *args, **keywords):
         npyscreen.notify_wait("Disconnecting.... Please wait...", title="Sentinel Network")
         try:
-            returncode = disconnect()
-            if returncode == 0:
+            returncode, self.CONNECTED = disconnect()
+            if returncode == 0 and not self.CONNECTED:
                 npyscreen.notify_confirm("Disconnected Successfully!", title='Sentinel dVPN')
-                self.CONNECTED = False
                 self.get_ip_address()
             else:
                 npyscreen.notify_confirm("ERROR: Something went wrong", title='Sentinel dVPN')
@@ -334,14 +343,16 @@ Keyname: %s
 def main():
     global CONFIG
     CONFIG = read_configuration(CONFFILE)
-    
+    FILE = open(CONFFILE,'w')
+
     if not CONFIG['wallet'].get('keyname'):
         CONFIG.set('wallet', 'keyname', input("Please enter the keyname of the wallet you would like to use: "))
     if not CONFIG['wallet'].get('address'):
         CONFIG.set('wallet', 'address',input("Please enter the wallet address: ") )
-
-    FILE = open(CONFFILE,'w')
+    
     CONFIG.write(FILE)
+
+    FILE.close()
     
     App = MeileApplication()
     App.run() 

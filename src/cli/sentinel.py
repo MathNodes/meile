@@ -5,6 +5,7 @@ from os import path
 import re
 
 
+
 IBCSCRT = 'ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8'
 IBCUNKWN = 'ibc/9BCB27203424535B6230D594553F1659C77EC173E36D9CF4759E7186EE747E84'
 BASEDIR = path.join(path.expanduser('~'), '.sentinelcli')
@@ -213,14 +214,21 @@ def disconnect():
     
     proc = Popen(wg_downCMD, stdout=PIPE, stderr=PIPE)
     proc_out,proc_err = proc.communicate()
-    return proc.returncode
+    
+    return proc.returncode, False
 
 def connect(ID, address, keyname):
     connCMD = ["sentinelcli", "connect", "--keyring-backend", "os", "--chain-id", "sentinelhub-2",
                "--node", "https://rpc.mathnodes.com:4444", "--gas-prices", "0.1udvpn", "--yes", "--from",keyname, ID, address]
     proc = Popen(connCMD, stdout=PIPE, stderr=PIPE)
     proc_out,proc_err = proc.communicate()
-    return proc.returncode
+    
+    if path.isfile(path.join(BASEDIR, "status.json")):
+        CONNECTED = True
+    else:
+        CONNECTED = False
+        
+    return proc.returncode, CONNECTED
 
 def subscribe(KEYNAME, NODE, DEPOSIT):
 

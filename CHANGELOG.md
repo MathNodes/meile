@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## Version 0.4.3 (17/04/2022)
+### OFFICIAL RELEASE
+* NEW: pip install
+* IMPROVEMENT: method for ensuring connection to active node will result in success or failure. Should be fail-proof. 
+* FIX: old/new IP address dialog
+* FIX: config file processing error
+
+## Version 0.4.0-0.4.2
+* YANKED: Due to pip install issues
+
 ## Version 0.3.1-BETA (08/04/2022)
 * FIX: BadgerBite Testserver listen errors
 
