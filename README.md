@@ -20,6 +20,14 @@ To start Meile simply run:
 meile
 ```
 
+## Upgrading for non-pip to pip
+```shell
+rm -rf ~/.meile
+pip install meile
+```
+
+Then re-enter your wallet name and address. Ez. 
+
 ## Intall (source)
 
 ```shell
