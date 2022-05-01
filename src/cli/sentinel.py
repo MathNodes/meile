@@ -6,8 +6,9 @@ import re
 
 
 
-IBCSCRT = 'ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8'
+IBCSCRT  = 'ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8'
 IBCUNKWN = 'ibc/9BCB27203424535B6230D594553F1659C77EC173E36D9CF4759E7186EE747E84'
+IBCDEC   = 'ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783'
 BASEDIR = path.join(path.expanduser('~'), '.sentinelcli')
 
 NodesInfoKeys = ["Moniker","Address","Provider","Price","Country","Speed","Latency","Peers","Handshake","Version","Status"]
@@ -60,6 +61,8 @@ def get_nodes():
                 v = v.replace(IBCSCRT,'uscrt')
             elif IBCUNKWN in v:
                 v = v.replace(IBCUNKWN,'unkwn')
+            elif IBCDEC in v:
+                v = v.replace(IBCDEC, 'udec')
             result[k].append(v.lstrip().rstrip())
             
     
@@ -78,7 +81,7 @@ def get_nodes():
                                                                                 NodesInfoKeys[6],
                                                                                 NodesInfoKeys[7],
                                                                                 "HS",
-                                                                                NodesInfoKeys[10]]
+                                                                                NodesInfoKeys[9]]
    
     #NodeData.append(173*dash)
     for e in range(pos):
@@ -88,7 +91,7 @@ def get_nodes():
                                                                                 result[NodesInfoKeys[6]][e],
                                                                                 result[NodesInfoKeys[7]][e],
                                                                                 result[NodesInfoKeys[8]][e],
-                                                                                result[NodesInfoKeys[10]][e]])
+                                                                                result[NodesInfoKeys[9]][e]])
                            
  
     NodeTableString = NodeTable.get_string()

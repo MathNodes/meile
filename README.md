@@ -44,11 +44,6 @@ Install
 python3 setup.py install
 ```
 
-Install python dependencies
-```shell
-pip install npyscreen requests prettytable
-```
-
 Run:
 ```shell
 meile
@@ -67,11 +62,18 @@ to fix any issues or add enhancments people may suggest.
 You tip a waiter/waitress for their service, why not tip a programmer for their code?
 
 ### Sentinel (dvpn)
+
+![img/dvpn.png](img/dvpn.png)
+
 ```shell
 sent1hfkgxzrkhxdxdwjy8d74jhc4dcw5e9zm7vfzh4
 ```
 
+
 ### Monero (xmr)
+
+![img/xmr.png](img/xmr.png)
+
 ```shell
 8A8TesuUctMQzq1oNM5VWQeZxu5SPDQyf87yMUdvPfSxjXQKvZSY3F7Dm9zGD3uKXbQ6ZMXGRydyQAGGQvBSfeVZBtJxh8A
 ```

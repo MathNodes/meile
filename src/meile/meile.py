@@ -21,7 +21,7 @@ BASEDIR = path.join(path.expanduser('~'), '.meile')
 CONFFILE = path.join(BASEDIR, 'config.ini')
 CONFIG = configparser.ConfigParser()
 LOGOFILE = os.path.join(BASEDIR, 'logo.uni')
-MEILEVERSION = "MEILE v0.4.3"
+MEILEVERSION = "MEILE v0.4.4"
 ICANHAZURL = "https://icanhazip.com"
 KEY_C = 67
 KEY_D = 68
@@ -195,6 +195,7 @@ class MainApp(npyscreen.FormWithMenus):
                 Enter/Space  - Select a node
                 CTRL+X       - Display the Menu
                 l            - Search with data box (Nodes, Subscriptions)
+                L            - Reset filter and go to top
                 n            - go to next entry of search results
                 H            - This help screen
                 S            - Subscribe to loaded node data (from F3)

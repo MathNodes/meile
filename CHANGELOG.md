@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Version 0.4.4 (01/05/2022)
+* NEW: Column for node software version. Replaces "STATUS"
+
 ## Version 0.4.3 (17/04/2022)
 ### OFFICIAL RELEASE
 * NEW: pip install
