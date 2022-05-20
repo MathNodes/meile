@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Version 0.4.6 (19/05/2022)
+* FIX: Wallet Box max_height
+
 ## Version 0.4.5 (19/05/2022)
 * NEW: Box Display of Wallet and Token Values
 * NEW: API Call in sentinel module, get_balance

@@ -21,7 +21,7 @@ BASEDIR = path.join(path.expanduser('~'), '.meile')
 CONFFILE = path.join(BASEDIR, 'config.ini')
 CONFIG = configparser.ConfigParser()
 LOGOFILE = os.path.join(BASEDIR, 'logo.uni')
-MEILEVERSION = "MEILE v0.4.5"
+MEILEVERSION = "MEILE v0.4.6"
 ICANHAZURL = "https://icanhazip.com"
 KEY_C = 67
 KEY_D = 68
@@ -135,7 +135,7 @@ class MainApp(npyscreen.FormWithMenus):
         
 
         self.ipBox = self.add(npyscreen.BoxTitle, values = IPDATA, rely=5, relx = 3, max_height=4, max_width = 30, editable = None )
-        self.coinBox = self.add(npyscreen.BoxTitle, values = CoinData, rely = 3,relx = self.x - 50, max_heigh = 9, max_width = 40, editable = None)
+        self.coinBox = self.add(npyscreen.BoxTitle, values = CoinData, rely = 3,relx = self.x - 50, max_height = 9, max_width = 40, editable = None)
         
         
         self.add(npyscreen.FixedText,rely=2, relx= self.x - 50, value="Press, H, for help / CTRL+x, for menu", editable = None)
