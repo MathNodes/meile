@@ -3,16 +3,19 @@ import collections
 from prettytable import PrettyTable
 from os import path
 import re
+import requests
+import json
 
-
-
+# IBC Tokens
 IBCSCRT  = 'ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8'
-IBCUNKWN = 'ibc/9BCB27203424535B6230D594553F1659C77EC173E36D9CF4759E7186EE747E84'
-IBCDEC   = 'ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783'
-BASEDIR = path.join(path.expanduser('~'), '.sentinelcli')
+IBCDEC   = 'ibc/9BCB27203424535B6230D594553F1659C77EC173E36D9CF4759E7186EE747E84'
+IBCUNKWN   = 'ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783'
 
+SATOSHI = 1000000
+
+BASEDIR  = path.join(path.expanduser('~'), '.sentinelcli')
+APIURL   = "https://api.sentinel.mathnodes.com"
 NodesInfoKeys = ["Moniker","Address","Provider","Price","Country","Speed","Latency","Peers","Handshake","Version","Status"]
-
 dash = "-"
 
 
@@ -198,6 +201,23 @@ def get_subscriptions(result, ADDRESS):
     SubsData = SubsTableString.split('\n')
      
     return SubsData
+
+def get_balance(address):
+    endpoint = "/bank/balances/" + address
+    CoinDict = {}
+    r = requests.get(APIURL + endpoint)
+    
+    coinJSON = r.json()
+    
+    for coin in coinJSON['result']:
+        if "udvpn" in coin['denom']:
+            CoinDict['dvpn'] = round(float(float(coin['amount']) / SATOSHI),4)
+        elif IBCSCRT in coin['denom']:
+            CoinDict['scrt'] = round(float(float(coin['amount']) / SATOSHI),4)
+        elif IBCDEC in coin['denom']:
+            CoinDict['dec'] = round(float(float(coin['amount']) / SATOSHI),4)
+            
+    return CoinDict
 
 def disconnect():
     ifCMD = ["ifconfig", "-a"]

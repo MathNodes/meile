@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version 0.4.5 (19/05/2022)
+* NEW: Box Display of Wallet and Token Values
+* NEW: API Call in sentinel module, get_balance
+* FIX: Display partial start,end of wallet address
+
 ## Version 0.4.4 (01/05/2022)
 * NEW: Column for node software version. Replaces "STATUS"
 

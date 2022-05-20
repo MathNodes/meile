@@ -10,7 +10,7 @@ from sys import exit
 from os import path
 import os
 from time import time
-from cli.sentinel import get_nodes, get_subscriptions,connect, disconnect
+from cli.sentinel import get_nodes, get_subscriptions,connect, disconnect, get_balance
 from cli.sentinel import subscribe as SentinelSubscribe
 from datetime import datetime
 
@@ -21,7 +21,7 @@ BASEDIR = path.join(path.expanduser('~'), '.meile')
 CONFFILE = path.join(BASEDIR, 'config.ini')
 CONFIG = configparser.ConfigParser()
 LOGOFILE = os.path.join(BASEDIR, 'logo.uni')
-MEILEVERSION = "MEILE v0.4.4"
+MEILEVERSION = "MEILE v0.4.5"
 ICANHAZURL = "https://icanhazip.com"
 KEY_C = 67
 KEY_D = 68
@@ -122,14 +122,25 @@ class MainApp(npyscreen.FormWithMenus):
         self.logo.editable = False 
         
         
+        
+        CoinData = []
+        CoinData.append("Wallet: " + WALLET)
+        CoinData.append("Address: " + ADDRESS[0:10] + "..." + ADDRESS[::-1][0:6][::-1])
+        CoinData.append(" ")
+        
+        
+        for key,val in get_balance(ADDRESS).items():
+            CoinData.append("{0:<4}{1:>15}".format(key,val))
+            
+        
+
         self.ipBox = self.add(npyscreen.BoxTitle, values = IPDATA, rely=5, relx = 3, max_height=4, max_width = 30, editable = None )
+        self.coinBox = self.add(npyscreen.BoxTitle, values = CoinData, rely = 3,relx = self.x - 50, max_heigh = 9, max_width = 40, editable = None)
         
         
-        
-        self.add(npyscreen.FixedText,rely=4, relx= self.x - 40, value="Press, H, for help", editable = None)
-        self.add(npyscreen.FixedText,rely=5, relx= self.x - 40, value="CTRL+x, for menu", editable = None)
-        self.add(npyscreen.FixedText,rely=9, relx= self.x - 58, value="Wallet: %s" % WALLET, editable = None)
-        self.add(npyscreen.FixedText,rely=10, relx= self.x - 58, value="Address: %s" % ADDRESS, editable = None)
+        self.add(npyscreen.FixedText,rely=2, relx= self.x - 50, value="Press, H, for help / CTRL+x, for menu", editable = None)
+        #self.add(npyscreen.FixedText,rely=9, relx= self.x - 58, value="Wallet: %s" % WALLET, editable = None)
+        #self.add(npyscreen.FixedText,rely=10, relx= self.x - 58, value="Address: %s" % ADDRESS, editable = None)
         
                  
         self.m1 = self.add_menu(name="Main Menu", shortcut="^M")
