@@ -13,6 +13,8 @@ from time import time
 from cli.sentinel import get_nodes, get_subscriptions,connect, disconnect, get_balance
 from cli.sentinel import subscribe as SentinelSubscribe
 from datetime import datetime
+from prettytable import PrettyTable
+from urllib3.exceptions import InsecureRequestWarning
 
 from curses import KEY_F2, KEY_F3, KEY_F5, KEY_F6, KEY_F7, COLOR_CYAN
 
@@ -21,11 +23,14 @@ BASEDIR = path.join(path.expanduser('~'), '.meile')
 CONFFILE = path.join(BASEDIR, 'config.ini')
 CONFIG = configparser.ConfigParser()
 LOGOFILE = os.path.join(BASEDIR, 'logo.uni')
-MEILEVERSION = "MEILE v0.4.6"
+MEILEVERSION = "MEILE v0.5.0"
 ICANHAZURL = "https://icanhazip.com"
+NODEAPIURL = 'https://api.sentinel.mathnodes.com/nodes/'
+
 KEY_C = 67
 KEY_D = 68
 KEY_H = 72
+KEY_I = 73
 KEY_S = 83
 
 def read_configuration(confpath):
@@ -53,6 +58,12 @@ def read_configuration(confpath):
 class BoxTitle(npyscreen.BoxTitle):
     _contained_widget = npyscreen.SelectOne
 
+class IBCCoinCheckBox(npyscreen.SelectOne):
+    _contained_widgets = npyscreen.CheckBox
+    _contained_widget_height = 1
+    
+    def display_value(self, vl):
+        return vl
 
 class MeileApplication(npyscreen.NPSAppManaged):
     def onStart(self):
@@ -79,6 +90,7 @@ class MainApp(npyscreen.FormWithMenus):
     SubsData = []
     NodeData = []
     result   = []
+    ibc_coins = ["udvpn","uscrt","uatom","udec","uosmo"]
     ip = ""
     old_ip = ""
     CONNECTED = False
@@ -90,7 +102,7 @@ class MainApp(npyscreen.FormWithMenus):
         ADDRESS = CONFIG['wallet'].get('address', '')
         WALLET  = CONFIG['wallet'].get('keyname', '')
         
-        self.keypress_timeout = 30
+        self.keypress_timeout = 5
 
         
         self.y,self.x = self.curses_pad.getmaxyx()
@@ -113,8 +125,8 @@ class MainApp(npyscreen.FormWithMenus):
         columns = shutil.get_terminal_size().columns
         rows = int(int(shutil.get_terminal_size().lines) / 2)
         newline = "\n"
-        if not rows*2 >= 66 or not columns >= 210:
-            exit("Terminal not big enough. Please make sure your terminal is at least 66x210. Use 'stty size' to determine and adjust appropriately.")
+        if not rows*2 >= 67 or not columns >= 221:
+            exit("Terminal not big enough. Please make sure your terminal is at least 66x240 (rows x col). Use 'stty size' to determine and adjust appropriately.")
         print(rows*newline,"Loading.... (%s x %s)".center(columns) % (rows*2, columns), end=' ')
         linlen=len(data[2])
         self.logo = self.add(npyscreen.BoxTitle, values=data, rely=4, relx= int((self.x - linlen) / 2),
@@ -122,15 +134,7 @@ class MainApp(npyscreen.FormWithMenus):
         self.logo.editable = False 
         
         
-        
-        CoinData = []
-        CoinData.append("Wallet: " + WALLET)
-        CoinData.append("Address: " + ADDRESS[0:10] + "..." + ADDRESS[::-1][0:6][::-1])
-        CoinData.append(" ")
-        
-        
-        for key,val in get_balance(ADDRESS).items():
-            CoinData.append("{0:<4}{1:>15}".format(key,val))
+        CoinData = self.get_wallet_balances(WALLET, ADDRESS)
             
         
 
@@ -166,12 +170,14 @@ class MainApp(npyscreen.FormWithMenus):
                                         'color': "CAUTION", 
                                         'widgets_inherit_color': False,}
                                     )
-        self.add(npyscreen.FixedText, rely = self.y -7, value="Selected Node")
-        self.node = self.add(npyscreen.TitleText, name = "Node: ", value=None, use_two_lines = False, begin_entry_at = 10, rely = self.y - 6, editable = None)
-        self.id = self.add(npyscreen.TitleText, name = "ID: ", value=None, use_two_lines = False, begin_entry_at = 10, rely = self.y - 5, editable = None)
-        self.address = self.add(npyscreen.TitleText, name = "Address: ", value=None, use_two_lines = False, begin_entry_at = 10, rely = self.y - 4, editable = None)
-        self.deposit = self.add(npyscreen.TitleText, name = "Deposit: ", value=None, use_two_lines = False, begin_entry_at = 10, rely = self.y - 6, relx = 72, editable = None )
-        self.price = self.add(npyscreen.TitleText, name = "Price: ", value=None, use_two_lines = False, begin_entry_at = 10, rely = self.y - 5, relx = 72, editable = None )
+        self.add(npyscreen.FixedText, rely = self.y -7, value="Selected Node", max_width = 13)
+        self.ibc_check_box = self.add(IBCCoinCheckBox, max_height=5, name="Testing", values=self.ibc_coins, slow_scroll=False, relx = 72 + 82, rely = self.y -7)
+
+        self.node = self.add(npyscreen.TitleText, name = "Node: ", value=None, use_two_lines = False, begin_entry_at = 10, rely = self.y - 6, editable = None, max_width = 60)
+        self.id = self.add(npyscreen.TitleText, name = "ID: ", value=None, use_two_lines = False, begin_entry_at = 10, rely = self.y - 5, editable = None, max_width = 30)
+        self.address = self.add(npyscreen.TitleText, name = "Address: ", value=None, use_two_lines = False, begin_entry_at = 10, rely = self.y - 4, editable = None, max_width = 54)
+        self.deposit = self.add(npyscreen.TitleText, name = "Deposit: ", max_width = 57, value=None, use_two_lines = False, begin_entry_at = 10, rely = self.y - 6, relx = 72, editable = None )
+        self.price = self.add(npyscreen.TitleText, name = "Price: ", value=None, max_width = 70, use_two_lines = False, begin_entry_at = 10, rely = self.y - 5, relx = 72, editable = None )
         self.dataGB = self.add(npyscreen.TitleSlider, max_width = 80, label=True, name="GB", value=19, out_of = 1000, step = 2, block_color = COLOR_CYAN, rely = self.y - 3, relx = 72)
         #self.add(npyscreen.FixedText, rely = self.y - 3, value="Use the menu to Connect/Subscribe (CTRL+X)", editable = None)
         self.add_handlers({KEY_F2: self.display_boxy})
@@ -182,14 +188,17 @@ class MainApp(npyscreen.FormWithMenus):
         self.add_handlers({KEY_C: self.connect_subscription})
         self.add_handlers({KEY_D: self.part_subscription})
         self.add_handlers({KEY_S: self.subscribe})
-        
+        self.add_handlers({KEY_I: self.expand_node_info})
 
     def while_waiting(self):
         if self.price.value:
-            mu_amt = re.findall(r'[0-9]+', self.price.value)[0]
-            mu_coin = re.findall(r'\D+', self.price.value)[0]
-            self.deposit.value = str(int(int(self.dataGB.value) * int(mu_amt))) + mu_coin 
-            self.deposit.display()
+            #mu_coin = re.findall(r'\D+', self.price.value)[0]
+            if self.ibc_check_box.value:
+                mu_coin = self.ibc_coins[self.ibc_check_box.value[0]]
+                mu_amt_coin = re.findall(r'[0-9]+' + mu_coin, self.price.value)[0]
+                mu_amt = re.findall(r'[0-9]+', mu_amt_coin)[0]
+                self.deposit.value = str(int(int(self.dataGB.value) * int(mu_amt))) + mu_coin 
+                self.deposit.display()
     
     def helpme(self, *args, **keywords):
         
@@ -212,6 +221,7 @@ class MainApp(npyscreen.FormWithMenus):
                 S            - Subscribe to loaded node data (from F3)
                 D            - Disconnect from connectd node
                 C            - Connect to loaded subscription (From F2)
+                I            - Select Node and Get Additional Information
                 ''' % MEILEVERSION
         npyscreen.notify_confirm(message, title="Meile HELP v0.2.0 (MathNodes)", form_color = "STANDOUT" , wide=True)
                 
@@ -290,6 +300,8 @@ Keyname: %s
     def subscribe(self, *args, **keywords):
         global CONFIG
         KEYNAME = CONFIG['wallet'].get('keyname', '')
+        ADDRESS = CONFIG['wallet'].get('address', '')
+
         
         try:
             message='''
@@ -306,6 +318,8 @@ Keyname: %s
                     if returncode == 0:
                         npyscreen.notify_confirm("Successfully Subscribe. Please reload your subscriptions. Remember it may take 1-5 minutes to show up.",
                                                  title="Meile Subscription")
+                        self.coinBox.values = self.get_wallet_balances(KEYNAME, ADDRESS)
+                        self.coinBox.display()
                     else:
                         npyscreen.notify_confirm("ERROR: Something went wrong with sentinelcli", title="ERROR")
                 else:
@@ -315,7 +329,18 @@ Keyname: %s
         except:
             npyscreen.notify_confirm("ERROR: Something went wrong.RETCODE=%s" % returncode, title="ERROR")
                 
-                
+    def get_wallet_balances(self, WALLET, ADDRESS):
+        
+        CoinData = []
+        CoinData.append("Wallet: " + WALLET)
+        CoinData.append("Address: " + ADDRESS[0:10] + "..." + ADDRESS[::-1][0:6][::-1])
+        CoinData.append(" ")
+        
+        
+        for key,val in get_balance(ADDRESS).items():
+            CoinData.append("{0:<4}{1:>15}".format(key,val))
+        
+        return CoinData            
             
     def display_boxy(self, *args, **keywords):
         try: 
@@ -339,6 +364,8 @@ Keyname: %s
             selected_node_data = self.NodeData[self.dVPNs.value[0]].split('|')[1:4]
             self.node.value    = selected_node_data[0].lstrip().rstrip()
             self.address.value = selected_node_data[1].lstrip().rstrip()
+            
+            # This needs to change along with CheckBox 
             self.price.value   = selected_node_data[2].lstrip().rstrip()
             self.id.value      = "N/A"
             #self.deposit.value =  "Enter Amt..."
@@ -348,9 +375,61 @@ Keyname: %s
             self.deposit.display()
             self.price.display()
         except:
-            pass 
+            pass
+        
+    def expand_node_info(self, *args, **keywords): 
+ 
+        selected_node_data = self.NodeData[self.dVPNs.value[0]].split('|')[1:4]
+        NADDRESS = selected_node_data[1].lstrip().rstrip()
 
-             
+        NodeTable = self.get_node_infos(NADDRESS)
+        npyscreen.notify_confirm(NodeTable, title="Node Info", form_color = "STANDOUT" , wide=True)
+ 
+
+                    
+
+
+    def get_node_infos(self, naddress):
+        APIURL   = "https://api.sentinel.mathnodes.com"
+
+        endpoint = "/nodes/" + naddress
+        
+        NodeInfoDict = {}
+        NodeTable = PrettyTable()    
+    
+        r = requests.get(APIURL + endpoint)
+        
+        remote_url = r.json()['result']['node']['remote_url']
+        print(remote_url)
+        requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+    
+        r = requests.get(remote_url + "/status", verify=False)
+        
+        NodeInfoJSON = r.json()
+        
+        NodeInfoDict['Moniker']         = NodeInfoJSON['result']['moniker']
+        NodeInfoDict['city']            = NodeInfoJSON['result']['location']['city']
+        NodeInfoDict['country']         = NodeInfoJSON['result']['location']['country']
+        NodeInfoDict['bandwidth']       = str(int(int(NodeInfoJSON['result']['bandwidth']['download']) / (1024*1024))) + "MB/s down, " + str(int(int(NodeInfoJSON['result']['bandwidth']['upload']) / (1024*1024))) + "MB/s up"
+        NodeInfoDict['connected_peers'] = NodeInfoJSON['result']['peers']
+        NodeInfoDict['max_peers']       = NodeInfoJSON['result']['qos']['max_peers']
+        NodeInfoDict['price']           = NodeInfoJSON['result']['price']
+        NodeInfoDict['version']         = NodeInfoJSON['result']['version']
+        
+        NodeTable.field_names = ['Moniker', 'City', 'Country', 'Bandwith', 'Connected Peers', 'Maximum Peers', 'Price', 'Version' ]
+        NodeTable.add_row([NodeInfoDict['Moniker'],
+                           NodeInfoDict['city'],
+                           NodeInfoDict['country'],
+                           NodeInfoDict['bandwidth'],
+                           NodeInfoDict['connected_peers'],
+                           NodeInfoDict['max_peers'],
+                           NodeInfoDict['price'],
+                           NodeInfoDict['version']
+                           ])
+        
+        return '___\nExpanded Node Data\n_____________________\n' + NodeTable.get_string()
+        
+            
         
 def main():
     global CONFIG

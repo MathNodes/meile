@@ -8,7 +8,7 @@ with open('README.md', encoding="utf-8") as f:
 
 setup(
     name='meile',
-    version='0.4.6',
+    version='0.5.0',
     description='Meile dVPN powered by the Sentinel Network',
     long_description=readme,
     long_description_content_type="text/markdown",

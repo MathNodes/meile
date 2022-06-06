@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## Version 0.5.0 (06/06/2022)
+* NEW: Support for dVPN node IBC multi-coin listings
+* NEW: Single checkbox for subscribing with IBC coins on Sentinel
+* NEW: Parsing of multi-coin IBC for accurate transaction in specific coin
+* NEW: Selecting a node in the table and pressing 'I' will display additional information about the selected node. This uses an API call to get status of specific node
+* CHANGE: reduced wait_time for updated deposit amount from 35 to 5, instant display
+* FIX: Specified max_width in node subscription listings for UI clarity
+* ADD: New function for parsing IBC tokens in node listings. 
+* REMOVED: Version and Handshake details from main node listing. They can now be found under the Info ('I') dialog. See help in Meile for more info.
+* CHANGED: Minimum screen display is now 221x67
+
 ## Version 0.4.6 (19/05/2022)
 * FIX: Wallet Box max_height
 
