@@ -128,10 +128,8 @@ def get_subscriptions(result, ADDRESS):
     
     for d in SubsNodesInfo:
         for k, v in d.items():
-            if IBCSCRT in v:
-                v = v.replace(IBCSCRT,'uscrt')
-            elif IBCUNKWN in v:
-                v = v.replace(IBCUNKWN, 'unkwn')
+            v=return_denom(v)
+
             SubsResult[k].append(v.lstrip().rstrip())
             
     SubsAddressSet = set(SubsResult[SubsInfoKeys[5]])
@@ -269,6 +267,14 @@ def connect(ID, address, keyname):
     return proc.returncode, CONNECTED
 
 def subscribe(KEYNAME, NODE, DEPOSIT):
+    
+    for ibc_coin in IBCCOINS:
+        for k,v in ibc_coin.items():
+            if k in DEPOSIT:
+                mu_amt = re.findall(r'[0-9]+', DEPOSIT)[0]
+                DEPOSIT = mu_amt + v
+
+                
 
     subscribeCMD = ["sentinelcli", "tx", "subscription", "subscribe-to-node", "--home", BASEDIR,  "--yes",
                     "--keyring-backend", "os", "--gas-prices", "0.1udvpn", "--chain-id", "sentinelhub-2",

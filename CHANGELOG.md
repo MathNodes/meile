@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Version 0.5.1 (06/06/2022)
+NEW: Auto updates Wallet Coin Info dialog after subscription
+FIX: Changed from IBC denom to IBC contract address in subscription
+
 ## Version 0.5.0 (06/06/2022)
 * NEW: Support for dVPN node IBC multi-coin listings
 * NEW: Single checkbox for subscribing with IBC coins on Sentinel

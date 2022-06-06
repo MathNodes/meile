@@ -23,7 +23,7 @@ BASEDIR = path.join(path.expanduser('~'), '.meile')
 CONFFILE = path.join(BASEDIR, 'config.ini')
 CONFIG = configparser.ConfigParser()
 LOGOFILE = os.path.join(BASEDIR, 'logo.uni')
-MEILEVERSION = "MEILE v0.5.0"
+MEILEVERSION = "MEILE v0.5.1"
 ICANHAZURL = "https://icanhazip.com"
 NODEAPIURL = 'https://api.sentinel.mathnodes.com/nodes/'
 
