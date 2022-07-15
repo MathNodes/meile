@@ -1,8 +1,12 @@
 # Meile (may•lah)
+[![GitHub license](https://img.shields.io/github/license/mathnodes/meile?style=for-the-badge)](https://github.com/MathNodes/meile/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/mathnodes/meile?style=for-the-badge)](https://github.com/mathnodes/meile/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/mathnodes/meile?style=for-the-badge)](https://github.com/mathnodes/meile/network)
+[![GitHub issues](https://img.shields.io/github/issues/mathnodes/meile?style=for-the-badge)](https://github.com/mathnodes/meile/issues)
 A Sentinel Network dVPN TUI client. 
 
 ## Dependencies
-![sentinel-cli](https://github.com/sentinel-official/cli-client)
+[sentinel-cli](https://github.com/sentinel-official/cli-client)
 
 You will need this in order for Meile to operate. Future versions of meile will ship with sentinel-cli. For now, please download and configure your wallet with the sentinel-cli app. 
 
