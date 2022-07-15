@@ -1,10 +1,11 @@
 # Meile (may•lah)
-[![Downloads](https://static.pepy.tech/personalized-badge/meile?period=total&units=international_system&left_color=black&right_color=orange&left_text=pip)](https://pepy.tech/project/meile)
-[![Downloads](https://static.pepy.tech/personalized-badge/meile?period=month&units=international_system&left_color=black&right_color=orange&left_text=pip%20(month))](https://pepy.tech/project/meile)
 [![GitHub license](https://img.shields.io/github/license/mathnodes/meile?style=for-the-badge)](https://github.com/MathNodes/meile/blob/main/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/mathnodes/meile?style=for-the-badge)](https://github.com/mathnodes/meile/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/mathnodes/meile?style=for-the-badge)](https://github.com/mathnodes/meile/network)
 [![GitHub issues](https://img.shields.io/github/issues/mathnodes/meile?style=for-the-badge)](https://github.com/mathnodes/meile/issues)
+
+[![Downloads](https://static.pepy.tech/personalized-badge/meile?period=total&units=international_system&left_color=black&right_color=orange&left_text=pip)](https://pepy.tech/project/meile)
+[![Downloads](https://static.pepy.tech/personalized-badge/meile?period=month&units=international_system&left_color=black&right_color=orange&left_text=pip%20(month))](https://pepy.tech/project/meile)
 
 A Sentinel Network dVPN TUI client. 
 
